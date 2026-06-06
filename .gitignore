@@ -1,0 +1,11 @@
+# Development tools & OS files
+.htaccess
+.DS_Store
+Thumbs.db
+*.log
+
+# Composer dependencies (agar aap use kar rahe hain)
+/vendor/
+
+# User Uploads / Images Cache (optional: agar aap chahte hain ke user ki photos upload na hon)
+# /uploads/
