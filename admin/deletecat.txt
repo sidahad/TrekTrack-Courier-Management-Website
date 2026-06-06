@@ -1,0 +1,13 @@
+<?php  
+$uid=$_GET['id'];
+include('conn.php');
+$sql = " DELETE FROM `users` WHERE `uid`=$uid";
+$query =mysqli_query ( $conn  , $sql );
+if ($query) {
+    header('location:index.php');
+} else  {
+    echo "<script>alert'Error Deleting Record';</script>";
+}
+?>
+
+                          <a href="deleteprod.php?id<?php echo $row ['pid'] ?>" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">

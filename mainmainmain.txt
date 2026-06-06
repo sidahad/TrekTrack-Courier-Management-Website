@@ -1,0 +1,17 @@
+trektrackcouriercompany.freewebhostmost.com
+
+
+$servername = "localhost";
+$username = "pnlizufk_trek_track";
+$password = "WpryQ7WtEKKNLa4eahP9";
+$dbname = "pnlizufk_trek_track";
+
+$conn = mysqli_connect($servername,$username,$password,$dbname);
+
+
+$host = "localhost";
+$user = "root";
+$pw = "";
+$db = "trek_track";
+
+$conn = mysqli_connect($host,$user,$pw,$db);

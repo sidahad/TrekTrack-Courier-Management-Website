@@ -1,0 +1,338 @@
+CREATE TABLE `courier_orders` (
+    `ud_id` INT(11) PRIMARY KEY AUTO_INCREMENT,
+    `uid` INT(11) NOT NULL,
+    `pid` INT(11) NOT NULL,
+    `sname` VARCHAR(100) NOT NULL,
+    `semail` VARCHAR(100) NOT NULL,  
+    `sphone` VARCHAR(20) NOT NULL,  
+    `scountry` VARCHAR(100) NOT NULL, 
+    `scity` VARCHAR(100) NOT NULL,  
+    `saddress` TEXT NOT NULL, 
+    `rname` VARCHAR(100) NOT NULL,  
+    `remail` VARCHAR(100) NOT NULL,  
+    `rphone` VARCHAR(20) NOT NULL,  
+    `rcountry` VARCHAR(100) NOT NULL, 
+    `rcity` VARCHAR(100) NOT NULL, 
+    `raddress` TEXT NOT NULL, 
+    `dmethod` ENUM('aeroplane', 'ship', 'truck') NOT NULL,
+    `tweight` DECIMAL(5, 2) NOT NULL,  
+    `totalprice` DECIMAL(10, 2) NOT NULL, 
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (uid) REFERENCES users(uid),
+    FOREIGN KEY (pid) REFERENCES products(pid)
+ 
+);
+
+
+$uid = $_SESSION['uid'];
+    if (!$uid) {
+        die("User is not logged in."); // Make sure session has uid
+    }
+
+    $pid = $_POST['pid'];  // Ensure pid is coming from the form
+    $sname = $_POST['sname'];
+    $semail = $_POST['semail'];
+    $sphone = $_POST['sphone'];
+    $scountry = $_POST['scountry'];
+    $scity = $_POST['scity'];
+    $saddress = $_POST['saddress'];
+
+    $rname = $_POST['rname'];
+    $remail = $_POST['remail'];
+    $rphone = $_POST['rphone'];
+    $rcountry = $_POST['rcountry'];
+    $rcity = $_POST['rcity'];
+    $raddress = $_POST['raddress'];
+
+    $dmethod = $_POST['dmethod'];
+    $tweight = $_POST['tweight'];
+    $totalprice = $_POST['totalprice'];
+
+    // Ensure uid exists in users table
+    $userQuery = "SELECT uid FROM users WHERE uid = $uid";
+    $userResult = mysqli_query($conn, $userQuery);
+
+    if (!$userResult) {
+        die("Error in user query: " . mysqli_error($conn)); // Debugging user query
+    }
+
+    if (mysqli_num_rows($userResult) == 0) {
+        die("User does not exist in the database.");
+    }
+
+    // Ensure pid exists in products table
+    $productQuery = "SELECT pid FROM products WHERE pid = $pid";
+    $productResult = mysqli_query($conn, $productQuery);
+
+    if (!$productResult) {
+        die("Error in product query: " . mysqli_error($conn)); // Debugging product query
+    }
+
+    if (mysqli_num_rows($productResult) == 0) {
+        die("Product does not exist in the database.");
+    }
+
+    $query = "INSERT INTO courier_orders (uid, pid, sname, semail, sphone, scountry, scity, saddress, rname, remail, rphone, rcountry, rcity, raddress, dmethod, tweight, totalprice)
+              VALUES ('$uid', '$pid', '$sname', '$semail', '$sphone', '$scountry', '$scity', '$saddress', '$rname', '$remail', '$rphone', '$rcountry', '$rcity', '$raddress', '$dmethod', '$tweight', '$totalprice')";
+
+    if (mysqli_query($conn, $query)) {
+        header('location: products.php');
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+}
+?>
+Explanation:
+
+
+CREATE TABLE courier_orders (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    uid INT, -- Assuming this is the user ID foreign key
+    pid INT, -- Assuming this is the product ID foreign key
+    sname VARCHAR(255) NOT NULL,
+    semail VARCHAR(255) NOT NULL,
+    sphone VARCHAR(20) NOT NULL,
+    scountry VARCHAR(100) NOT NULL,
+    scity VARCHAR(100) NOT NULL,
+    saddress TEXT NOT NULL,
+    rname VARCHAR(255) NOT NULL,
+    remail VARCHAR(255) NOT NULL,
+    rphone VARCHAR(20) NOT NULL,
+    rcountry VARCHAR(100) NOT NULL,
+    rcity VARCHAR(100) NOT NULL,
+    raddress TEXT NOT NULL,
+    dmethod VARCHAR(50) NOT NULL, -- Delivery method (aeroplane, ship, truck)
+    tweight DECIMAL(10, 2) NOT NULL, -- Total weight of the package
+    totalprice DECIMAL(10, 2) NOT NULL, -- Total price based on weight and delivery method
+    FOREIGN KEY (uid) REFERENCES users(uid) ON DELETE CASCADE, -- Assuming users table exists
+    FOREIGN KEY (pid) REFERENCES products(pid) ON DELETE CASCADE -- Assuming products table exists
+);
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sender & Receiver Checkout</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .checkout-container {
+            max-width: 900px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .main-heading {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        td {
+            background-color: #f9f9f9;
+        }
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input[type="text"], input[type="email"], input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .flex-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .flex-item {
+            flex-basis: 48%;
+        }
+        .form-footer {
+            text-align: right;
+        }
+        .total-price {
+            font-weight: bold;
+            font-size: 20px;
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<?php include 'headers.php';?>
+
+<div class="checkout-container">
+    <h2 class="main-heading">Sender & Receiver Checkout Details</h2>
+    <form action="#" method="POST">
+        <table>
+            <thead>
+                <tr>
+                    <th>Sender Details</th>
+                    <th>Receiver Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="form-section">
+                            <label for="sender_name">Sender Name:</label>
+                            <input type="text" id="sender_name" name="sname" required>
+
+                            <label for="sender_email">Sender Email:</label>
+                            <input type="email" id="sender_email" name="semail" required>
+
+                            <label for="sender_phone">Sender Phone:</label>
+                            <input type="text" id="sender_phone" name="sphone" required>
+
+                            <label for="receiver_name">From Which Country</label>
+                            <input type="text" id="From_Which_Country" name="scountry" required>
+
+                            <label for="receiver_name">From Which City</label>
+                            <input type="text" id="From_Which_City" name="scity" required>
+
+                            <label for="sender_address">Sender Address:</label>
+                            <input type="text" id="sender_address" name="saddress" required>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="form-section">
+                            <label for="receiver_name">Receiver Name:</label>
+                            <input type="text" id="receiver_name" name="rname" required>
+
+                            <label for="receiver_email">Receiver Email:</label>
+                            <input type="email" id="receiver_email" name="remail" required>
+
+                            <label for="receiver_phone">Receiver Phone:</label>
+                            <input type="text" id="receiver_phone" name="rphone" required>
+
+                            <label for="receiver_name">To Which Country</label>
+                            <input type="text" id="To_Which_Country" name="rcountry" required>
+
+                            <label for="receiver_name">From Which City</label>
+                            <input type="text" id="To_Which_City" name="rcity" required>
+
+                            <label for="receiver_address">Receiver Address:</label>
+                            <input type="text" id="receiver_address" name="raddress" required>
+
+                            <!-- Add this to your form -->
+                            <input type="hidden" name="pid" value="<?php echo $pid; ?>">
+
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="flex-container">
+            <div class="flex-item">
+                <label for="delivery_method">Delivery Method:</label>
+                <select id="delivery_method" name="dmethod" onchange="calculatePrice()" required>
+                    <option value="aeroplane" data-price="10000">Aeroplane</option>
+                    <option value="ship" data-price="5000">Ship</option>
+                    <option value="truck" data-price="1000">Truck</option>
+                </select>
+            </div>
+            <div class="flex-item">
+                <label for="weight">Weight (KG):</label>
+                <select id="weight" name="tweight" onchange="calculatePrice()" required>
+                    <option value="1">1 KG</option>
+                    <option value="2">2 KG</option>
+                    <option value="3">3 KG</option>
+                    <option value="4">4 KG</option>
+                    <option value="5">5 KG</option>
+                    <option value="6">6 KG</option>
+                    <option value="7">7 KG</option>
+                    <option value="8">8 KG</option>
+                    <option value="9">9 KG</option>
+                    <option value="10">10 KG</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Hidden input for the calculated total price -->
+        <input type="hidden" id="hidden_price" name="totalprice" value="10000">
+
+        <div class="total-price">
+            Total Price: <span id="price_display">10000</span> USD
+        </div>
+
+        <div class="form-footer">
+            <button type="submit" name="ptcheckout">Proceed to Payment</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function calculatePrice() {
+        const deliveryMethodSelect = document.getElementById('delivery_method');
+        const weightSelect = document.getElementById('weight');
+        
+        const selectedDeliveryMethod = deliveryMethodSelect.options[deliveryMethodSelect.selectedIndex];
+        const pricePerKg = selectedDeliveryMethod.getAttribute('data-price');
+        const weight = weightSelect.value;
+
+        const totalPrice = pricePerKg * weight;
+        document.getElementById('price_display').textContent = totalPrice;
+        document.getElementById('hidden_price').value = totalPrice;  // Update hidden input
+    }
+
+    // Calculate initial price on page load
+    window.onload = calculatePrice;
+</script>
+
+<?php include 'footers.php';?>
+
+</body>
+</html>
+

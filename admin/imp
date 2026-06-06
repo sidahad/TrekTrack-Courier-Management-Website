@@ -1,0 +1,80 @@
+-- SQL to create a table for storing payment details
+
+CREATE TABLE payments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    order_id INT NOT NULL,
+    card_type VARCHAR(20),
+    card_number VARCHAR(16),
+    card_holder_name VARCHAR(100),
+    expiration_date DATE,
+    cvv VARCHAR(3),
+    amount DECIMAL(10, 2),
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(uid),
+    FOREIGN KEY (order_id) REFERENCES courier_orders(order_id)
+);
+
+
+CREATE TABLE courier_orders (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    uid INT, -- Assuming this is the user ID foreign key
+    pid INT, -- Assuming this is the product ID foreign key
+    sname VARCHAR(255) NOT NULL,
+    semail VARCHAR(255) NOT NULL,
+    sphone VARCHAR(20) NOT NULL,
+    scountry VARCHAR(100) NOT NULL,
+    scity VARCHAR(100) NOT NULL,
+    saddress TEXT NOT NULL,
+    rname VARCHAR(255) NOT NULL,
+    remail VARCHAR(255) NOT NULL,
+    rphone VARCHAR(20) NOT NULL,
+    rcountry VARCHAR(100) NOT NULL,
+    rcity VARCHAR(100) NOT NULL,
+    raddress TEXT NOT NULL,
+    dmethod VARCHAR(50) NOT NULL, -- Delivery method (aeroplane, ship, truck)
+    tweight DECIMAL(10, 2) NOT NULL, -- Total weight of the package
+    totalprice DECIMAL(10, 2) NOT NULL, -- Total price based on weight and delivery method
+    FOREIGN KEY (uid) REFERENCES users(uid), -- Assuming users table exists
+    FOREIGN KEY (pid) REFERENCES products(pid) -- Assuming products table exists
+);
+
+create table products(
+    pid int PRIMARY KEY AUTO_INCREMENT,
+    pname varchar (255),
+    pimg varchar(255),
+    pcategory int(11),
+
+    FOREIGN KEY (pcategory) REFERENCES categories(cid)
+    FOREIGN KEY (orderitem) REFERENCES courier_orders(order_id)
+
+);
+
+CREATE table categories(
+    cid int PRIMARY KEY AUTO_INCREMENT,
+    cname varchar (255)
+);
+
+create table users(
+    uid int PRIMARY KEY AUTO_INCREMENT,
+    Username varchar (50) NOT NULL,
+    First_Name varchar (50) NOT NULL,
+    Last_Name varchar (59) NOT NULL,
+    Email varchar (50) NOT NULL,
+    Pass varchar (50) NOT NULL,
+    upimg varchar(255) NOT NULL,
+    ucimg varchar(255) NOT NULL,
+);
+
+dash_user(
+    u_id int PRIMARY KEY AUTO_INCREMENT,
+    Username varchar (50) NOT NULL,
+    First_Name varchar (50) NOT NULL,
+    Last_Name varchar (59) NOT NULL,
+    Email varchar (50) NOT NULL,
+    Pass varchar (50) NOT NULL,
+    upimg varchar(255) NOT NULL,
+    ucimg varchar(255) NOT NULL,
+);
+
+
